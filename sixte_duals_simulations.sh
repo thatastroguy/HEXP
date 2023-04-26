@@ -30,7 +30,7 @@ $SIXTE/bin/runsixt XMLFile=${SIXTE}/share/instruments/hex-p/het/hexp_het_ff.xml 
 $SIXTE/bin/runsixt XMLFile=${SIXTE}/share/instruments/hex-p/het/hexp_het_ff.xml Prefix=sixtesim_ RA=${ARG2} Dec=${ARG3} Simput=dualagn_${ARG1}as_simput${ARG5}.fits EvtFile=${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}.fits Exposure=${ARG4}
 
 # Here we're generating the accompanying LET image, using the simput file from SOXS....
-$SIXTE/bin/runsixt XMLFile=${SIXTE}/share/instruments/hex-p/let/hexp_let_LEO_ff.xml Prefix=sixtesim_ RA=${ARG2} Dec=${ARG3} Simput=dualagn_${ARG1}as_simput${ARG5}.fits EvtFile=${ARG1}as_evt${ARG4%???}ks_LET${ARG5}.fits Exposure=${ARG4}
+$SIXTE/bin/runsixt XMLFile=${SIXTE}/share/instruments/hex-p/let/hexp_let_ff.xml Prefix=sixtesim_ RA=${ARG2} Dec=${ARG3} Simput=dualagn_${ARG1}as_simput${ARG5}.fits EvtFile=${ARG1}as_evt${ARG4%???}ks_LET${ARG5}.fits Exposure=${ARG4}
 
 # Here we're using the radec2xy tool to add X,Y sky coordinates and a WCS to the event files...
 $SIXTE/bin/radec2xy EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}.fits projection=TAN RefRA=${ARG2} RefDec=${ARG3}
@@ -54,6 +54,9 @@ $SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_2HETeff${ARG5}.fits
 #   CRVAL2: Dec coordinate for observation
 # The above values MUST match the original RA and Dec values of the simulated event file!!
 # Calculate CDELT by taking xdelt and ydelt in the xml file (in units of m) and dividing by 20m (the focal length) and multiplying by 180/PI
+
+# Note on 26 April 2023: CDELT has not changed between v4 (my old version) and v7.
+
 
 # Now we'll extract spectra for the two positions of the AGNs. In these simulations, we always assume there are two AGNs, \
 # and we will always extract two spectra, even in the case of convolved sources (for simplicity of the code).
