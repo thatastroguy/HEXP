@@ -119,3 +119,21 @@ EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}.fits \
 Spectrum=SPEC_BKG_${ARG1}as_${ARG4%???}ks_LET${ARG5}.pha \
 EventFilter="regfilter(\"bkg_${ARG1}.reg\")" \
 RSPPath=${SIXTE}/share/instruments/hex-p/let/ clobber=yes
+
+
+
+# New script commands below here that generate attitude files and exposure maps
+#$SIXTE/bin/attgen_dither Attitude=attitude_lissajous.fits Amplitude=0.035 SrcRA=30.0 SrcDec=45.0 Exposure=50000
+#
+#$SIXTE/bin/exposure_map \
+#Vignetting=${SIXTE}/share/instruments/hex-p/het/HEXP_HET_vign_sixte_v07.fits \
+#Attitude=attitude_lissajous.fits \
+#Exposuremap=expo_map.fits \
+#XMLFile=${SIXTE}/share/instruments/hex-p/het/hexp_het_ff.xml \
+#fov_diameter=70 \
+#CoordinateSystem=0 projection_type=TAN \
+#NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg \
+#CRVAL1=30.0 CRVAL2=45.0 CRPIX1=320.5 CRPIX2=320.5 \
+#CDELT1=-3.460665e-4 CDELT2=3.460665e-4 \
+#TSTART=0 timespan=50000.000000 dt=100. \
+#chatter=3 clobber=true
