@@ -3,7 +3,7 @@
 # SIXTE HEX-P Simulations for Dual AGNs and Mergers
 # Author: R. W. Pfeifle
 # Creation Date: 29 December 2023
-# Last Revision: 25 April 2023
+# Last Revision: 22 May 2023
 
 ARG1="$1" # Choice of separation
 ARG2="$2" # RA
@@ -37,18 +37,45 @@ $SIXTE/bin/radec2xy EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}.fits
 $SIXTE/bin/radec2xy EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}.fits projection=TAN RefRA=${ARG2} RefDec=${ARG3}
 $SIXTE/bin/radec2xy EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}.fits projection=TAN RefRA=${ARG2} RefDec=${ARG3}
 
+# Here we're adding some energy filtering prior to science image creation. Lea Marcotulli supplied the ftselect for this via Slack
+ftselect infile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}.fits[EVENTS]" outfile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}_2-80.fits" expression='SIGNAL >= 2.0 && SIGNAL < 80.0' clobber=yes
+ftselect infile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}.fits[EVENTS]" outfile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}_2-80.fits" expression='SIGNAL >= 2.0 && SIGNAL < 80.0' clobber=yes
+ftselect infile="sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}.fits[EVENTS]" outfile="sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}_0p2-25.fits" expression='SIGNAL >= 0.2 && SIGNAL < 25.0' clobber=yes
+# This set will be analogous imaging to the NuSTAR 3-24 keV imaging
+ftselect infile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}.fits[EVENTS]" outfile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}_3-24.fits" expression='SIGNAL >= 3.0 && SIGNAL < 24.0' clobber=yes
+ftselect infile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}.fits[EVENTS]" outfile="sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}_3-24.fits" expression='SIGNAL >= 3.0 && SIGNAL < 24.0' clobber=yes
+ftselect infile="sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}.fits[EVENTS]" outfile="sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}_3-24.fits" expression='SIGNAL >= 3.0 && SIGNAL < 24.0' clobber=yes
+
 # Here we are generating a combined HET image, saved as 2HETeff
 ftmerge \
 sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}.fits,sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}.fits \
 sixtesim_${ARG1}as_evt${ARG4%???}ks_2HETeff${ARG5}.fits clobber=yes
+
+ftmerge \
+sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}_2-80.fits,sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}_2-80.fits \
+sixtesim_${ARG1}as_evt${ARG4%???}ks_2HETeff${ARG5}_2-80.fits clobber=yes
+
+ftmerge \
+sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}_3-24.fits,sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}_3-24.fits \
+sixtesim_${ARG1}as_evt${ARG4%???}ks_2HETeff${ARG5}_3-24.fits clobber=yes
 
 # Here we're generating image files for each HET (just in case we want to compare them to the combined image) and the LET
 $SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_HET1${ARG5}.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
 $SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_HET2${ARG5}.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
 $SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_LET${ARG5}.fits CoordinateSystem=0 Projection=TAN NAXIS1=512 NAXIS2=512 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=256.5 CRPIX2=256.5 CDELT1=-3.7242256e-4 CDELT2=3.7242256e-4 history=true clobber=yes
 
-# Here we're generating the image files from the effective 2 camera HET image and the LET image
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}_2-80.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_HET1${ARG5}_2-80.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}_2-80.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_HET2${ARG5}_2-80.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}_0p2-25.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_LET${ARG5}_0p2-25.fits CoordinateSystem=0 Projection=TAN NAXIS1=512 NAXIS2=512 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=256.5 CRPIX2=256.5 CDELT1=-3.7242256e-4 CDELT2=3.7242256e-4 history=true clobber=yes
+
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET1${ARG5}_3-24.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_HET1${ARG5}_3-24.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_HET2${ARG5}_3-24.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_HET2${ARG5}_3-24.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_LET${ARG5}_3-24.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_LET${ARG5}_3-24.fits CoordinateSystem=0 Projection=TAN NAXIS1=512 NAXIS2=512 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=256.5 CRPIX2=256.5 CDELT1=-3.7242256e-4 CDELT2=3.7242256e-4 history=true clobber=yes
+
+# Here we're generating the image files from the effective 2 camera HET image
 $SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_2HETeff${ARG5}.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_2HETeff${ARG5}.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_2HETeff${ARG5}_2-80.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_2HETeff${ARG5}_2-80.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
+$SIXTE/bin/imgev EvtFile=sixtesim_${ARG1}as_evt${ARG4%???}ks_2HETeff${ARG5}_3-24.fits Image=IMAGE_${ARG1}as_img${ARG4%???}ks_2HETeff${ARG5}_3-24.fits CoordinateSystem=0 Projection=TAN NAXIS1=640 NAXIS2=640 CUNIT1=deg CUNIT2=deg CRVAL1=${ARG2} CRVAL2=${ARG3} CRPIX1=320.5 CRPIX2=320.5 CDELT1=-3.460665e-4 CDELT2=3.460665e-4 history=true clobber=yes
 # Note: 
 #   CRVAL1: RA coordinate for observation
 #   CRVAL2: Dec coordinate for observation
